@@ -33,7 +33,7 @@ def logic(data: List[Businesses], filter_condition: LostRequest) -> List[Busines
     for business in data:
         # Calculate distance 
         distance = calculate_distance(business.coordinates, filter_condition.location_coordinates)
-        if distance <= 500.0 and is_business_open_on_date(business.opening_hours, filter_condition.request_date):
+        if distance <= filter_condition.radius and is_business_open_on_date(business.opening_hours, filter_condition.request_date):
             filtered_businesses.append(business)
     
     return filtered_businesses
