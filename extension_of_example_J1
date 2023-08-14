@@ -1,52 +1,82 @@
 import dataclasses
 from typing import List, Tuple
-# from geopy import geodesic
-from datetime import datetime, time
+from datetime import datetime, time, date
 
 @dataclasses.dataclass
 class Businesses:
     name: str
     email: str
-    location: tuple[float, float]
-    open: 'opening_hours'
+    coordinates: Tuple[float, float]
+    opening_hours: 'Business_hours'
 
 
 @dataclasses.dataclass
 class LostRequest:
     description: str
-    location: tuple[float,float]
-    time: datetime
     email: str
+    location_coordinates: Tuple[float,float] #centre of search
+    radius: float   #radius in some unit that I still don't know but imagine to be meters. 
+    request_date: date
+
 
 @dataclasses.dataclass
-class opening_hours:
+class Business_hours:
     opening_time: time
     closing_time: time
-    # ?rest_days:
+    # days? still got a long way to go here
 
 
 def logic(data: List[Businesses], filter_condition: LostRequest) -> List[Businesses]:
-    #The function which identifies business where a lost item could be found.
-    possibly_here = []  # stores matches
-    
-    for business in data:
-        # Check if the filter_condition description is in the business name or email
-        if filter_condition.location in business.location or filter_condition.time in business.open:
-            possibly_here.append(business)
-    
-    return possibly_here  # Return the list of matching businesses where lost item might be
+    filtered_businesses = []  # stores matches
 
+    for business in data:
+        # Calculate distance using a simple distance formula
+        distance = calculate_distance(business.coordinates, filter_condition.location_coordinates)
+        if distance <= 500.0 :
+            filtered_businesses.append(business)
+    
+    return filtered_businesses
+
+def calculate_distance(coords1: Tuple[float, float], coords2: Tuple[float, float]) -> float:
+    # Calculate distance using a simple Euclidean distance formula
+    return ((coords1[0] - coords2[0]) ** 2 + (coords1[1] - coords2[1]) ** 2) ** 0.5
+
+'''def is_business_open_at_time(opening_hours: Business_hours, check_time: time) -> bool:
+    # Check if the check_time is within the opening hours
+    return opening_hours.opening_time <= check_time <= opening_hours.closing_time'''
 
 def test_logic():
     tests = [
         {
             "input": {
-                "data": [Businesses(location=(52.5163,13.3777), name="foo", email="foo@foo.com", open), Businesses(location=(52.5220,13.4133), name="qux")],
-                "filter_condition": LostRequest(location=(52.5163, 13.3777)),
+                "data": [
+                    Businesses(
+                        email="foo@bar.zip",
+                        name="foo",
+                        coordinates=(52.5017, 13.4183),
+                        #opening_hours=Business_hours(opening_time=time(9, 0), closing_time=time(18, 0))
+                    ),
+                    Businesses(
+                        email="qux@bar.zip",
+                        name="qux",
+                        coordinates=(52.4982, 13.4290)#,
+                        #opening_hours=Business_hours(opening_time=time(8, 30), closing_time=time(17, 30))
+                    ),
+                ],
+                "filter_condition": LostRequest(
+                    #description="I lost my wallet",
+                    location_coordinates=(52.4990, 13.4267),
+                    #request_time=time(10, 30)
+                ),
             },
-            #"want": [Businesses(email="foo@bar.zip", name="foo")]
-            "want": [Businesses(location=(52.5163,13.3777), name="foo")]
-
+            "want": [
+                Businesses(
+                    email="foo@bar.zip",
+                    name="foo",
+                    coordinates=(52.5017, 13.4183)#,
+                    #opening_hours=Business_hours(opening_time=time(9, 0), closing_time=time(18, 0))
+                )
+            ]
         }
     ]
 
@@ -55,5 +85,4 @@ def test_logic():
         assert got == test["want"]
         
 
-# Call the test function to see if logic works as expected
 test_logic()
