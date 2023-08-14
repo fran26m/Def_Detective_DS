@@ -1,0 +1,59 @@
+import dataclasses
+from typing import List, Tuple
+# from geopy import geodesic
+from datetime import datetime, time
+
+@dataclasses.dataclass
+class Businesses:
+    name: str
+    email: str
+    location: tuple[float, float]
+    open: 'opening_hours'
+
+
+@dataclasses.dataclass
+class LostRequest:
+    description: str
+    location: tuple[float,float]
+    time: datetime
+    email: str
+
+@dataclasses.dataclass
+class opening_hours:
+    opening_time: time
+    closing_time: time
+    # ?rest_days:
+
+
+def logic(data: List[Businesses], filter_condition: LostRequest) -> List[Businesses]:
+    #The function which identifies business where a lost item could be found.
+    possibly_here = []  # stores matches
+    
+    for business in data:
+        # Check if the filter_condition description is in the business name or email
+        if filter_condition.location in business.location or filter_condition.time in business.open:
+            possibly_here.append(business)
+    
+    return possibly_here  # Return the list of matching businesses where lost item might be
+
+
+def test_logic():
+    tests = [
+        {
+            "input": {
+                "data": [Businesses(location=(52.5163,13.3777), name="foo", email="foo@foo.com", open), Businesses(location=(52.5220,13.4133), name="qux")],
+                "filter_condition": LostRequest(location=(52.5163, 13.3777)),
+            },
+            #"want": [Businesses(email="foo@bar.zip", name="foo")]
+            "want": [Businesses(location=(52.5163,13.3777), name="foo")]
+
+        }
+    ]
+
+    for test in tests:
+        got = logic(test["input"]["data"], test["input"]["filter_condition"])
+        assert got == test["want"]
+        
+
+# Call the test function to see if logic works as expected
+test_logic()
