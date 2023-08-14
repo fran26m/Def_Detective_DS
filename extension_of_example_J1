@@ -1,0 +1,91 @@
+import dataclasses
+from typing import List, Tuple
+from datetime import datetime, time, date
+
+@dataclasses.dataclass
+class Businesses:
+    name: str
+   #email: str
+    coordinates: Tuple[float, float]
+    opening_hours: 'Business_hours'
+
+
+@dataclasses.dataclass
+class LostRequest:
+    #description: str
+    #email: str
+    location_coordinates: Tuple[float,float] #centre of search
+    radius: float   #radius in some unit that I still don't know but imagine to be meters. 
+    request_date: date
+
+
+@dataclasses.dataclass
+class Business_hours:
+    opening_days: List[str]
+    opening_time: time
+    closing_time: time
+    # days? still got a long way to go here
+
+
+def logic(data: List[Businesses], filter_condition: LostRequest) -> List[Businesses]:
+    filtered_businesses = []  # stores matches
+
+    for business in data:
+        # Calculate distance 
+        distance = calculate_distance(business.coordinates, filter_condition.location_coordinates)
+        if distance <= filter_condition.radius and is_business_open_on_date(business.opening_hours, filter_condition.request_date):
+            filtered_businesses.append(business)
+    
+    return filtered_businesses
+
+def calculate_distance(coords1: Tuple[float, float], coords2: Tuple[float, float]) -> float:
+    # Calculate distance using a simple Euclidean distance formula
+    return ((coords1[0] - coords2[0]) ** 2 + (coords1[1] - coords2[1]) ** 2) ** 0.5
+
+def is_business_open_on_date(opening_hours: Business_hours, check_date: date) -> bool:
+    # Check if the check_time is within the opening hours
+    return opening_hours.opening_days and check_date.strftime('%A') in opening_hours.opening_days
+
+
+def test_logic():
+    tests = [
+        {
+            "input": {
+                "data": [
+                    Businesses(
+                        #email="foo@bar.zip",
+                        name="foo",
+                        coordinates=(52.5017, 13.4183),
+                        opening_hours=Business_hours(opening_days=["Monday", "Tuesday"], opening_time="09:00 AM", closing_time="06:00 PM")
+                    ),
+                    '''Businesses(
+                        email="qux@bar.zip",
+                        name="qux",
+                        coordinates=(52.4982, 13.4290),
+                        opening_hours=Business_hours(opening_days=["Monday", "Wednesday"], opening_time="08:30 AM", closing_time="05:30 PM")
+                    ),'''
+                ],
+                "filter_condition": LostRequest(
+                    #description="I lost my wallet",
+                    location_coordinates=(52.4990, 13.4267),
+                    radius=500.0,
+                    request_date=date(2021, 8, 10)
+                ),
+            },
+            "want": [
+                Businesses(
+                    #email="foo@bar.zip",
+                    name="foo",
+                    coordinates=(52.5017, 13.4183),
+                    opening_hours=Business_hours(opening_days=["Monday", "Tuesday"], opening_time="09:00 AM", closing_time="06:00 PM")
+                )
+            ]
+        }
+    ]
+
+    for test in tests:
+        got = logic(test["input"]["data"], test["input"]["filter_condition"])
+        assert got == test["want"]
+        
+
+test_logic()
