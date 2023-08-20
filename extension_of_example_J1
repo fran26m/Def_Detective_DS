@@ -56,28 +56,28 @@ def test_logic():
                         email="foo@bar.zip",
                         name="foo",
                         coordinates=(52.5017, 13.4183),
-                        opening_hours=Business_hours(opening_days=["Monday", "Tuesday"], opening_time="09:00 AM", closing_time="06:00 PM")
+                        opening_hours=Business_hours(opening_days=["Monday", "Tuesday"], opening_time=time(9,0), closing_time=time(18,0))
                     ),
-                    '''Businesses(
+                    Businesses(
                         email="qux@bar.zip",
                         name="qux",
                         coordinates=(52.4982, 13.4290),
-                        opening_hours=Business_hours(opening_days=["Monday", "Wednesday"], opening_time="08:30 AM", closing_time="05:30 PM")
-                    ),'''
+                        opening_hours=Business_hours(opening_days=["Monday", "Wednesday"], opening_time=time(19,0), closing_time=time(5,0))
+                    ),
                 ],
                 "filter_condition": LostRequest(
-                    #description="I lost my wallet",
+                    description="I lost my wallet",
                     location_coordinates=(52.4990, 13.4267),
                     radius=500.0,
-                    request_date=date(2021, 8, 10)
+                    request_date=date(2021, 8, 10)    #THIS HERE IS A PROBLEM
                 ),
             },
             "want": [
                 Businesses(
-                    #email="foo@bar.zip",
+                    email="foo@bar.zip",
                     name="foo",
                     coordinates=(52.5017, 13.4183),
-                    opening_hours=Business_hours(opening_days=["Monday", "Tuesday"], opening_time="09:00 AM", closing_time="06:00 PM")
+                    opening_hours=Business_hours(opening_days=["Monday", "Tuesday"], opening_time=time(9,0), closing_time=time(18,0))
                 )
             ]
         }
