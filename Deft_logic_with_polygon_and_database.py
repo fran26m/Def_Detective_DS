@@ -77,7 +77,20 @@ def test_logic():
     tests = [
         {
             "input": {
-                "data": [],
+                "data": [
+                    Businesses(
+                        email="foo@bar.zip",
+                        name="foo",
+                        coordinates=Point(52.5017, 13.4183),
+                        opening_hours=Business_hours(opening_days=["Monday", "Tuesday"], opening_time=time(9, 0), closing_time=time(18, 0))
+                    ),
+                    Businesses(
+                        email="qux@bar.zip",
+                        name="qux",
+                        coordinates=Point(52.4982, 13.4290),
+                        opening_hours=Business_hours(opening_days=["Monday", "Wednesday"], opening_time=time(8, 30), closing_time=time(17, 30))
+                    )
+                ],
                 "filter_condition": LostRequest(
                     description="I lost my wallet",
                     email="test@test.com",
@@ -87,5 +100,26 @@ def test_logic():
                         Point(52.5030, 13.4200),
                         Point(52.4980, 13.4200)
                     ],
-                    request_date=date(2023, 8, 21),  # Monday 21/08/2023
-                    lost_time=time(10,0)
+                    request_date=date(2023, 8, 21), #monday 21/08/2023
+                    lost_time=time(10, 0)
+                )
+            },
+            "want": [
+                Businesses(
+                    email="foo@bar.zip",
+                    name="foo",
+                    coordinates=(52.5017, 13.4183),
+                    opening_hours=Business_hours(opening_days=["Monday", "Tuesday"], opening_time=time(9, 0), closing_time=time(18, 0))
+                )
+            ]
+        }
+    ]
+
+    for i, test in enumerate(tests, 1):
+        got = logic(test["input"]["data"], test["input"]["filter_condition"])
+        if got == test["want"]:
+            print(f"Test {i} passed!")
+        else:
+            print(f"Test {i} failed. Expected: {test['want']}, but got: {got}")
+
+test_logic()
