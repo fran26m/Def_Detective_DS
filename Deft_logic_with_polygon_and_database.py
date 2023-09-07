@@ -54,7 +54,7 @@ def is_business_open_at_time(opening_hours: Business_hours, check_date: date, ch
 
 def logic(data: List[Businesses], filter_condition: LostRequest, geojson_file_path: str) -> List[Businesses]:
     # Load the GeoJSON file as a GeoDataFrame
-    gdf = gpd.read_file(geojson_file_path)
+    gdf = gpd.read_file("https://raw.githubusercontent.com/TechLabs-Berlin/ss23-deft-detective/8b9eab4335837c2aec83fc79684261938888d2a2/data/places.geojson")
     
     filtered_businesses = []
     for _, row in gdf.iterrows():
